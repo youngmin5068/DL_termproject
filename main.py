@@ -39,7 +39,8 @@ for s in range(model_num):
     transform_train = transforms.Compose([
         transforms.Resize(256),
         transforms.RandomCrop(224),
-        transforms.ColorJitter(0.5,0.5),
+        #transforms.ColorJitter(0.5,0.5),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ])
@@ -76,7 +77,7 @@ for s in range(model_num):
         optimizer = optim.Adamax(model.parameters(), lr=lr)
     else:
         optimizer = optim.Adamax(model.parameters(), lr=lr*0.1)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer,[40],0.1)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer,[20,40],0.1)
 
     def train():
         model.train()
