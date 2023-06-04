@@ -11,9 +11,9 @@ from resnet import ResNet18
 
 
 
-model_num = 2 # total number of models
-total_epoch = 150 # total epoch
-lr = 0.01 # initial learning rate
+model_num = 4 # total number of models
+total_epoch = 100 # total epoch
+lr = 0.1 # initial learning rate
 
 mixup_alpha = 1.0
 
@@ -63,18 +63,15 @@ for s in range(model_num):
 
     # Define the data transforms
     transform_train = transforms.Compose([
-        #transforms.Resize(256),
-        #transforms.CenterCrop(224),
-        transforms.RandomCrop(32,padding=4),
-        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(32,4),
+        transforms.AutoAugment(),  
         transforms.ToTensor(),
-        transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
     ])
 
     transform_test = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])
-
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
     ])
 
 
@@ -95,8 +92,8 @@ for s in range(model_num):
 
     # Define the loss function and optimizer
 
-    #criterion = nn.CrossEntropyLoss()
-    criterion = LabelSmoothingCrossEntropy()
+    criterion = nn.CrossEntropyLoss()
+    #criterion = LabelSmoothingCrossEntropy()
     #optimizer = optim.Adam(model.parameters(),lr=lr,betas=(0.99,0.999))
     optimizer = optim.SGD(model.parameters(),lr,momentum=0.9,weight_decay=0.0002)
     # Define the learning rate scheduler
@@ -131,7 +128,7 @@ for s in range(model_num):
 
             if i % 100 == 99:
 
-                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 100))
+                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / inputs.size(0)))
 
                 running_loss = 0.0   
 
