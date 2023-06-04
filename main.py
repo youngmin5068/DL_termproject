@@ -7,12 +7,11 @@ import torch.optim as optim
 import timm
 import random
 import numpy as np
-from resnet import ResNet18
 
 
 
 model_num = 4 # total number of models
-total_epoch = 100 # total epoch
+total_epoch = 60 # total epoch
 lr = 0.01 # initial learning rate
 
  # Check if GPU is available
@@ -38,15 +37,18 @@ for s in range(model_num):
 
     # Define the data transforms
     transform_train = transforms.Compose([
-        transforms.RandomCrop(32,4),
-        transforms.AutoAugment(),  
+        transforms.Resize(256),
+        transforms.RandomCrop(224),
+        transforms.ColorJitter(0.5,0.5),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ])
 
     transform_test = transforms.Compose([
+        transforms.Resize(256),
+        transforms.RandomCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
     ])
 
 
@@ -70,8 +72,11 @@ for s in range(model_num):
     # Define the loss function and optimizer
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(),lr=lr,betas=(0.99,0.999))
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer,[50,90],0.1)
+    if s < 2:
+        optimizer = optim.Adamax(model.parameters(), lr=lr)
+    else:
+        optimizer = optim.Adamax(model.parameters(), lr=lr*0.1)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer,[40],0.1)
 
     def train():
         model.train()
